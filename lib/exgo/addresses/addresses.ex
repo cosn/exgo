@@ -37,6 +37,8 @@ defmodule ExGo.Addresses do
   """
   def get_link!(id), do: Repo.get!(Link, id)
 
+  def get_link_by_name!(name), do: Repo.get_by!(Link, name: name)
+
   @doc """
   Creates a link.
 

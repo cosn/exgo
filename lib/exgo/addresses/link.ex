@@ -14,7 +14,7 @@ defmodule ExGo.Addresses.Link do
   def changeset(link, attrs) do
     link
     |> cast(attrs, [:name, :url])
-    |> validate_required([:name, :url])
+    |> validate_required([:url])
     |> unique_constraint(:name)
     |> unique_constraint(:url)
   end

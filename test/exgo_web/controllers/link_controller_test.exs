@@ -1,92 +1,86 @@
 defmodule ExGoWeb.LinkControllerTest do
   use ExGoWeb.ConnCase
 
-  alias ExGo.Addresses
-  alias ExGo.Addresses.Link
-
-  @create_attrs %{
-    name: "some name",
-    url: "some url"
+  @full_link %{
+    name: "foobar",
+    url: "http://foobar.com"
   }
-  @update_attrs %{
-    name: "some updated name",
-    url: "some updated url"
-  }
-  @invalid_attrs %{name: nil, url: nil}
 
-  def fixture(:link) do
-    {:ok, link} = Addresses.create_link(@create_attrs)
-    link
-  end
+  @partial_link %{
+    url: "http://foobar.com"
+  }
+
+  @hashcode "122f03d"
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
-  describe "index" do
-    test "lists all links", %{conn: conn} do
-      conn = get(conn, Routes.link_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
-    end
-  end
-
   describe "create link" do
-    test "renders link when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.link_path(conn, :create), link: @create_attrs)
+    test "link with name and url", %{conn: conn} do
+      conn = post(conn, Routes.link_path(conn, :create), link: @full_link)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, Routes.link_path(conn, :show, id))
 
       assert %{
                "id" => id,
-               "name" => "some name",
-               "url" => "some url"
+               "name" => "foobar",
+               "url" => "http://foobar.com"
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.link_path(conn, :create), link: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
-
-  describe "update link" do
-    setup [:create_link]
-
-    test "renders link when data is valid", %{conn: conn, link: %Link{id: id} = link} do
-      conn = put(conn, Routes.link_path(conn, :update, link), link: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+    test "link only with url", %{conn: conn} do
+      conn = post(conn, Routes.link_path(conn, :create), link: @partial_link)
+      assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, Routes.link_path(conn, :show, id))
 
       assert %{
                "id" => id,
-               "name" => "some updated name",
-               "url" => "some updated url"
+               "name" => @hashcode,
+               "url" => "http://foobar.com"
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, link: link} do
-      conn = put(conn, Routes.link_path(conn, :update, link), link: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
-    end
+    # test "renders errors when data is invalid", %{conn: conn} do
+    #   conn = post(conn, Routes.link_path(conn, :create), link: @invalid_attrs)
+    #   assert json_response(conn, 422)["errors"] != %{}
+    # end
   end
 
-  describe "delete link" do
-    setup [:create_link]
+  # describe "update link" do
+  #   setup [:create_link]
 
-    test "deletes chosen link", %{conn: conn, link: link} do
-      conn = delete(conn, Routes.link_path(conn, :delete, link))
-      assert response(conn, 204)
+  #   test "renders link when data is valid", %{conn: conn, link: %Link{id: id} = link} do
+  #     conn = put(conn, Routes.link_path(conn, :update, link), link: @update_attrs)
+  #     assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
-      assert_error_sent 404, fn ->
-        get(conn, Routes.link_path(conn, :show, link))
-      end
-    end
-  end
+  #     conn = get(conn, Routes.link_path(conn, :show, id))
 
-  defp create_link(_) do
-    link = fixture(:link)
-    {:ok, link: link}
-  end
+  #     assert %{
+  #              "id" => id,
+  #              "name" => "some updated name",
+  #              "url" => "some updated url"
+  #            } = json_response(conn, 200)["data"]
+  #   end
+
+  #   test "renders errors when data is invalid", %{conn: conn, link: link} do
+  #     conn = put(conn, Routes.link_path(conn, :update, link), link: @invalid_attrs)
+  #     assert json_response(conn, 422)["errors"] != %{}
+  #   end
+  # end
+
+  # describe "delete link" do
+  #   setup [:create_link]
+
+  #   test "deletes chosen link", %{conn: conn, link: link} do
+  #     conn = delete(conn, Routes.link_path(conn, :delete, link))
+  #     assert response(conn, 204)
+
+  #     assert_error_sent 404, fn ->
+  #       get(conn, Routes.link_path(conn, :show, link))
+  #     end
+  #   end
+  # end
 end

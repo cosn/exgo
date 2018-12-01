@@ -12,7 +12,15 @@ defmodule ExGoWeb.LinkController do
   end
 
   def create(conn, %{"link" => link_params}) do
-    with {:ok, %Link{} = link} <- Addresses.create_link(link_params) do
+
+    name = case link_params["name"] do
+      true -> link_params["name"]
+      _ -> ExGo.Hashcode.generate(link_params["url"])
+    end
+
+    params = Map.put_new(link_params, "name", name)
+
+    with {:ok, %Link{} = link} <- Addresses.create_link(params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.link_path(conn, :show, link))
@@ -25,19 +33,8 @@ defmodule ExGoWeb.LinkController do
     render(conn, "show.json", link: link)
   end
 
-  def update(conn, %{"id" => id, "link" => link_params}) do
-    link = Addresses.get_link!(id)
-
-    with {:ok, %Link{} = link} <- Addresses.update_link(link, link_params) do
-      render(conn, "show.json", link: link)
-    end
-  end
-
-  def delete(conn, %{"id" => id}) do
-    link = Addresses.get_link!(id)
-
-    with {:ok, %Link{}} <- Addresses.delete_link(link) do
-      send_resp(conn, :no_content, "")
-    end
+  def show(conn, %{"name" => name}) when is_binary(name) do
+    link = Addresses.get_link_by_name!(name)
+    render(conn, "show.json", link: link)
   end
 end

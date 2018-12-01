@@ -5,7 +5,11 @@ defmodule ExGoWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", ExGoWeb do
+  scope "/api/links", ExGoWeb do
     pipe_through :api
+
+    post "/", LinkController, :create
+    get "/:id", LinkController, :show
+    get "/name/:name", LinkController, :show
   end
 end
